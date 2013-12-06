@@ -1,59 +1,50 @@
 import numpy as np
-from scipy import linalg
+from scipy import linalg as la
 
-def QR(X):
-    """Compute the Gram Schmidt of the column vectors in X
+def QR(A):
+    '''
+    Compute the QR decomposition of an inveritble square matrix using the 
+    modified Gram-Schmidt Algorithm. Assume no zeros occur on the main diagonal.
+    Inputs:
+        A -- square array of rank n, no zeros on main diagonal
+    Return:
+        (Q, R) -- A = QR, Q is orthonormal, R is upper triangular
+    '''
+    n = A.shape[0]
+    U = np.copy(A) # make a copy of A so we don't change it
+    Q = np.zeros(A.shape)
+    R = np.zeros(A.shape)
+    for i in xrange(n):
+        r = ((U[:,i]**2).sum())**(.5)                # calculate r_{ii}
+        q = (U[:,i]/r)                               # calculate q_i
+        Q[:,i] = q                                  
+        R[i,i] = r               
+        rr = (U[:,i+1:]*(q.reshape(n,1))).sum(axis=0)  # caluclate r_{ij}, j>i
+        U[:,i+1:] = U[:,i+1:] - rr*q.reshape(n,1)     # project out q_i
+        R[i,i+1:] = rr
+    return Q, R
 
-    The formula: x_k := x_k-<x_k, q_1>*q_1  (k=2,...,n)
-    Then we normalize x_k
-    
-    label: QR
-    """
+def QRDet(A):
+    '''
+    Compute the magnitude of the determinant of a square invertible matrix using
+    your QR decomposition function.
+    Inputs:
+        A -- square invertible matrix
+    Return:
+        the magnitude of the determinant of A.
+    '''
+    Q,R = QR(A)
+    return np.diag(R).prod()
 
-    #transpose so we are dealing with rows instead of columns
-    Q = X.T.copy()
-    nrows, ncols = X.shape
-    R = np.zeros((nrows, ncols))
-
-    for i in xrange(nrows):
-        R[i,i] = linalg.norm(Q[i])
-        Q[i] = Q[i]/R[i,i]
-        for j in xrange(i+1,nrows):
-            R[i,j] = Q[j].dot(Q[i])
-            Q[j] = Q[j]-(R[i,j]*Q[i])
-
-    return Q.T, R
-    
-    
-def detQR(X):
-    """Computes the determinant of X using the QR decomposition
-    This will give you the determinant up to, but without sign.
-    
-    The determinant of Q is +1 or -1 which may or may not change the sign of
-    the determinant of R"""
-    Q, R = QR(X)
-    return np.diagonal(R).prod()
-
-def leastsq(A, b):
-    """Compute a least squares solution using the QR Decomposition"""
-    Q, R = linalg.qr(A)
-    
-    #We solve the triangular system instead of inverting R
-    return linalg.solve_triangular(R, Q.T.dot(b))
-    
-    
-def eigvv(A, niter=50):
-    Qlist = [A]
-    x0 = np.random.rand(A.shape[1])
-    for i in range(niter):
-        Q,R = QR(Qlist[-1])
-        A = Q.T.dot(A.dot(Q))        
-        Qlist.append(A)
-    
-    eigvals = np.diag(Qlist[-1])
-    
-    L = np.eye(Q.shape[0])    
-    for qm in Qlist:
-        L = L.dot(qm)
-       
-    return eigvals, x0, L
+def LeastSquares(A,b):
+    '''
+    Using the scipy.linalg functions qr and solve_triangular, calculate
+    the least sqaures solutions x_hat to the overdetermined system Ax = b.
+    Inputs:
+        A -- a full-rank (m,n) matrix
+        b -- a m-dimensional vector
+    Return:
+        the least squares solution to the system Ax = b
+    '''
+    Q,R = la.qr(A, mode='economic')
+    return la.solve_triangular(R,Q.T.dot(b))
