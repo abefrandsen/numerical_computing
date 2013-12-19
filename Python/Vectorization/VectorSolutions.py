@@ -61,3 +61,4 @@ def imageEditor(X,edit,n=1):
             
     plt.imshow(Xnew)
     plt.show()
+
