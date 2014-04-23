@@ -1,8 +1,107 @@
-\lab{Python}{Intro to \emph{pandas}}{Intro to \emph{pandas}}
+\lab{Python}{Intro to pandas}{Intro to pandas}
 
 In volumes 1 and 2, we solved data problems primarily using NumPy and SciPy.
 We now turn our attention to a Python library that is more specifically built for data
 analysis. Welcome to \emph{pandas}.
+
+\section*{Data Structures in pandas}
+Just as NumPy is built on the ndarray data structure suited for efficient scientific and numerical
+computation, pandas is centered around a handful of core data structures custom built for data
+analysis. These data structures include the Series, DataFrame, and Panel. We explore each in turn.
+
+\subsection*{Series}
+A Series is a one-dimensional array whose entries are labeled. The values of the array may be 
+any data type, including integers, strings, or general Python objects. Further, the array
+need not be homogeneous. That is, it can hold values of different data types. Together, the
+array values are referred to as the data of the Series.
+
+The labels must consist of hashable types. They are commonly integers or strings. 
+Together, the labels are referred to as the index of the Series.
+
+Thus, a Series consists of data and an index. The most basic way to initialize such an object
+is as follows:
+\begin{lstlisting}
+>>> import pandas as pd
+>>> s = pd.Series(data, index=index)
+\end{lstlisting}
+We needn't explicitly define the index. The default index is simply \li{np.arange(len(data))}.
+
+For example, we can create a Series containing the integers from 9 down to 0:
+\begin{lstlisting}
+>>> s1 = pd.Series(range(9, -1, -1))
+>>> s1.values    #the data
+array([9, 8, 7, 6, 5, 4, 3, 2, 1, 0], dtype=int64)
+>>> s1.index     #the labels
+Int64Index([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], dtype='int64')
+>>> s1           #left column is index, right column is data
+0    9
+1    8
+2    7
+3    6
+4    5
+5    4
+6    3
+7    2
+8    1
+9    0
+dtype: int64
+\end{lstlisting}
+
+Here is an example where we create customized labels:
+\begin{lstlisting}
+>>> data = np.random.randn(3)
+>>> index = ['first', 'second', 'third']
+>>> s2 = pd.Series(data, index=index)
+>>> s2
+first     1.661255
+second   -0.033570
+third    -2.185991
+dtype: float64
+\end{lstlisting}
+
+We can create a Series having constant values in the following manner:
+\begin{lstlisting}
+>>> val = 4     #desired constant value of Series
+>>> n = 6      #desired length of Series
+>>> s3 = pd.Series(val, index=range(n))
+>>> s3
+0    4
+1    4
+2    4
+3    4
+4    4
+5    4
+dtype: int64
+\end{lstlisting}
+
+It is also possible to use a Python dictionary when creating a Series:
+\begin{lstlisting}
+>>> d = {'s1':93, 's2':95, 's3':87, 's4':82, 's5':94}
+>>> s4 = pd.Series(d)
+>>> s4
+s1    93
+s2    95
+s3    87
+s4    82
+s5    94
+dtype: int64
+\end{lstlisting}
+Note that we didn't need to specify the index: the keys of the dictionary are used as the index for the Series. 
+
+\begin{problem}
+Create the following pandas Series.
+
+\begin{itemize}
+\item Constant array with value -3, length 5. Labels should be the first five positive even integers.
+
+\item Data is given by the dictionary \li{{'Bill':31, 'Sarah':28, 'Jane':34, 'Joe':26}}.
+\end{itemize}
+\end{problem}
+
+
+\subsection*{DataFrame}
+
+\subsection*{Panel}
 
 \section*{Viewing Data}
 Indexing.
@@ -17,4 +116,4 @@ Cleaning data. Transposing. Sorting.
 \li{describe} method.
 
 \section*{Data I/O}
-Before we 
+Before we
