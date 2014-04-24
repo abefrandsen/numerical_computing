@@ -10,12 +10,12 @@ computation, pandas is centered around a handful of core data structures custom 
 analysis. These data structures include the Series, DataFrame, and Panel. We explore each in turn.
 
 \subsection*{Series}
-A Series is a one-dimensional array whose entries are labeled. The values of the array may be 
+A Series is a one-dimensional array whose entries are labeled. The values of the array may be
 any data type, including integers, strings, or general Python objects. Further, the array
 need not be homogeneous. That is, it can hold values of different data types. Together, the
 array values are referred to as the data of the Series.
 
-The labels must consist of hashable types. They are commonly integers or strings. 
+The labels must consist of hashable types. They are commonly integers or strings.
 Together, the labels are referred to as the index of the Series.
 
 Thus, a Series consists of data and an index. The most basic way to initialize such an object
@@ -62,7 +62,7 @@ dtype: float64
 We can create a Series having constant values in the following manner:
 \begin{lstlisting}
 >>> val = 4     #desired constant value of Series
->>> n = 6      #desired length of Series
+>>> n = 6       #desired length of Series
 >>> s3 = pd.Series(val, index=range(n))
 >>> s3
 0    4
@@ -76,17 +76,17 @@ dtype: int64
 
 It is also possible to use a Python dictionary when creating a Series:
 \begin{lstlisting}
->>> d = {'s1':93, 's2':95, 's3':87, 's4':82, 's5':94}
+>>> d = {'e1':93, 'e2':95, 'e3':87, 'e4':82, 'e5':94}
 >>> s4 = pd.Series(d)
 >>> s4
-s1    93
-s2    95
-s3    87
-s4    82
-s5    94
+e1    93
+e2    95
+e3    87
+e4    82
+e5    94
 dtype: int64
 \end{lstlisting}
-Note that we didn't need to specify the index: the keys of the dictionary are used as the index for the Series. 
+Note that we didn't need to specify the index: the keys of the dictionary are used as the index for the Series.
 
 \begin{problem}
 Create the following pandas Series.
@@ -98,7 +98,90 @@ Create the following pandas Series.
 \end{itemize}
 \end{problem}
 
+As with the ndarray, we can slice a Series using the usual syntax:
+\begin{lstlisting}
+>>> s4[:3]
+e1    93
+e2    95
+e3    87
+dtype: int64
+\end{lstlisting}
+Notice that both the data and the index are sliced in this manner.
+We can also input Series with numerical data into many NumPy functions.
+\begin{lstlisting}
+>>> np.log(s4)
+e1    4.532599
+e2    4.553877
+e3    4.465908
+e4    4.406719
+e5    4.543295
+dtype: float64
+\end{lstlisting}
 
+A Series also has similarities with the Python dictionary.
+We can access and alter the data using the index.
+\begin{lstlisting}
+>>> s4['e3']
+87
+>>> s4['e3'] = 99
+>>> s4['e3']
+99
+\end{lstlisting}
+
+We finish off this section by considering elementary vectorized operations with Series.
+\begin{lstlisting}
+>>> x = pd.Series(np.random.randn(4), index=['a', 'b', 'c', 'd'])
+>>> x
+a   -0.924259
+b    0.767422
+c    0.399212
+d    0.130365
+dtype: float64
+>>> y = pd.Series(np.random.randn(5), index=['a', 'b', 'd', 'e', 'f'])
+>>> y
+a   -0.708301
+b   -2.214516
+d   -2.352364
+e    0.789419
+f   -0.859482
+dtype: float64
+\end{lstlisting}
+Much as with the NumPy array, we can perform basic arithmetic operations on the entries of
+a Series without the use of a for-loop. For example, we square the elements of \li{x} as
+follows:
+\begin{lstlisting}
+>>> x**2
+a    0.854254
+b    0.588937
+c    0.159370
+d    0.016995
+dtype: float64
+\end{lstlisting}
+In some cases, the Series allows for even greater flexibility than the NumPy array. For example,
+we are able to add Series \li{x} and \li{y}, even though they have different lengths and labels:
+\begin{lstlisting}
+>>> z = x+y
+>>> z
+a   -1.632559
+b   -1.447093
+c         NaN
+d   -2.221999
+e         NaN
+f         NaN
+dtype: float64
+\end{lstlisting}
+Notice that the index of \li{z} is the \emph{union} of the index of \li{x} and the index of \li{y}.
+For the labels shared by both \li{x} and \li{y} (namely \li{a}, \li{b}, and \li{d}), the corresponding
+value of \li{z} is just the sum of the entries of \li{x} and \li{y}. In all other cases, the value of 
+\li{z} is \li{NaN}, which is the pandas type indicating a missing value. It is simple to omit missing 
+values from a series:
+\begin{lstlisting}
+>>> z.dropna()
+a   -1.632559
+b   -1.447093
+d   -2.221999
+dtype: float64
+\end{lstlisting}
 \subsection*{DataFrame}
 
 \subsection*{Panel}
@@ -108,6 +191,7 @@ Indexing.
 Slice columns.
 \li{head} and \li{tail} methods.
 Elementary database operations (select, join)
+Plotting.
 
 \section*{Manipulating Data}
 Cleaning data. Transposing. Sorting.
