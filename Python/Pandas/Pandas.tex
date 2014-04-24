@@ -10,7 +10,7 @@ computation, pandas is centered around a handful of core data structures custom 
 analysis. These data structures include the Series, DataFrame, and Panel. We explore each in turn.
 
 \subsection*{Series}
-A Series is a one-dimensional array whose entries are labeled. The values of the array may be
+The Series is a one-dimensional array whose entries are labeled. The values of the array may be
 any data type, including integers, strings, or general Python objects. Further, the array
 need not be homogeneous. That is, it can hold values of different data types. Together, the
 array values are referred to as the data of the Series.
@@ -74,7 +74,7 @@ We can create a Series having constant values in the following manner:
 dtype: int64
 \end{lstlisting}
 
-It is also possible to use a Python dictionary when creating a Series:
+It is also possible to use a Python dict when creating a Series:
 \begin{lstlisting}
 >>> d = {'e1':93, 'e2':95, 'e3':87, 'e4':82, 'e5':94}
 >>> s4 = pd.Series(d)
@@ -86,7 +86,7 @@ e4    82
 e5    94
 dtype: int64
 \end{lstlisting}
-Note that we didn't need to specify the index: the keys of the dictionary are used as the index for the Series.
+Note that we didn't need to specify the index: the keys of the dict are used as the index for the Series.
 
 \begin{problem}
 Create the following pandas Series.
@@ -94,7 +94,7 @@ Create the following pandas Series.
 \begin{itemize}
 \item Constant array with value -3, length 5. Labels should be the first five positive even integers.
 
-\item Data is given by the dictionary \{`Bill':31, `Sarah':28, `Jane':34, `Joe':26\}.
+\item Data is given by the dict \{`Bill':31, `Sarah':28, `Jane':34, `Joe':26\}.
 \end{itemize}
 \end{problem}
 
@@ -118,7 +118,7 @@ e5    4.543295
 dtype: float64
 \end{lstlisting}
 
-A Series also has similarities with the Python dictionary.
+A Series also has similarities with the Python dict.
 We can access and alter the data using the index.
 \begin{lstlisting}
 >>> s4['e3']
@@ -183,7 +183,110 @@ d   -2.221999
 dtype: float64
 \end{lstlisting}
 \subsection*{DataFrame}
+The DataFrame data structure is a two-dimensional generalization of the Series. It can be viewed
+as a tabular structure with labeled rows and columns. The row labels are collectively called the
+index, and the column labels are collectively called the columns. An individual columns in a 
+DataFrame object is a Series.
 
+There are many ways to initialize a DataFrame. In the following, we build a DataFrame out of a
+dict of Series.
+\begin{lstlisting}
+>>> d = {1:x, 2:y}
+>>> df1 = pd.DataFrame(d)
+>>> df1
+	        1	        2
+a	-0.924259	-0.708301
+b	 0.767422	-2.214516
+c	 0.399212	      NaN
+d	 0.130365	-2.352364
+e	      NaN	 0.789419
+f	      NaN	-0.859482
+\end{lstlisting}
+Note that the index of this DataFrame is the union of the index of Series \li{x} and that of Series \li{y}.
+The columns are given by the keys of the dict \li{d}. Since \li{x} doesn't have a label \li{e}, the
+value in row \li{e}, column \li{1} is \li{NaN}. This same reasoning explains the other missing values as well.
+Note that if we take the first column of the DataFrame and drop the missing values, we recover the Series \li{x}:
+\begin{lstlisting}
+>>> x == df1[1].dropna()
+a    True
+b    True
+c    True
+d    True
+dtype: bool
+\end{lstlisting}
+
+We can also initialize a DataFrame using a NumPy array, creating custom row and column labels:
+\begin{lstlisting}
+>>> data = np.random.random((3,4))
+>>> pd.DataFrame(data, index=['A','B','C'], columns=range(1,5))
+
+            1	        2	        3	        4
+A	 0.065646	 0.968593	 0.593394	 0.750110
+B	 0.803829	 0.662237	 0.200592	 0.137713
+C	 0.288801	 0.956662	 0.817915	 0.951016
+3 rows × 4 columns
+\end{lstlisting}
+As with Series, if we don't specify the index or columns, the default is \li{range(n)}, where \li{n} is either the number of 
+rows or columns.
+
+A DataFrame behaves in certain respects like a dict of Series, where each column label and the corresponding column form the key-value pairs.
+We can access a desired column via its column label:
+\begin{lstlisting}
+>>> df1[2]
+a   -0.708301
+b   -2.214516
+c         NaN
+d   -2.352364
+e    0.789419
+f   -0.859482
+Name: 2, dtype: float64
+\end{lstlisting}
+We can insert a new column or delete a column much as we would with a dict:
+\begin{lstlisting}
+>>> df1['product'] = df1[1] * df1[2]  #insert column containing the product of columns 1 and 2
+>>> df1['constant'] = 'const'         #insert column containing constant data
+>>> df1
+            1	        2	  product	 constant
+a	-0.924259	-0.708301	 0.654653	    const
+b	 0.767422	-2.214516	-1.699469	    const
+c	 0.399212	      NaN	      NaN	    const
+d	 0.130365	-2.352364	-0.306666	    const
+e	      NaN	 0.789419	      NaN	    const
+f	      NaN	-0.859482	      NaN	    const
+6 rows × 4 columns
+>>> del df1['constant']
+            1	        2	  product	
+a	-0.924259	-0.708301	 0.654653	
+b	 0.767422	-2.214516	-1.699469	
+c	 0.399212	      NaN	      NaN	
+d	 0.130365	-2.352364	-0.306666	
+e	      NaN	 0.789419	      NaN	
+f	      NaN	-0.859482	      NaN	
+6 rows × 4 columns
+\end{lstlisting}
+
+We can also select specified rows, either using the row label, or its integer position:
+\begin{lstlisting}
+>>> df1.loc['b']        #select 2nd row via label
+1          0.767422
+2         -2.214516
+product   -1.699469
+Name: b, dtype: float64
+>>> df1.iloc[1]         #select 2nd row via integer position
+1          0.767422
+2         -2.214516
+product   -1.699469
+Name: b, dtype: float64
+\end{lstlisting}
+We can slice rows much as we do with NumPy arrays:
+\begin{lstlisting}
+>>> df1[1:4]
+	        1	        2	  product
+b	 0.767422	-2.214516	-1.699469
+c	 0.399212	      NaN	      NaN
+d	 0.130365	-2.352364	-0.306666
+3 rows × 3 columns
+\end{lstlisting}
 \subsection*{Panel}
 
 \section*{Viewing Data}
@@ -198,6 +301,6 @@ Cleaning data. Transposing. Sorting.
 
 \section*{Analyzing Data}
 \li{describe} method.
-
+Have them read in financial data for several stocks. Then calculate means and variances of each. Find the stock with highest mean, lowest variance.
 \section*{Data I/O}
 Before we
